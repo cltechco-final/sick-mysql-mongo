@@ -14,3 +14,4 @@ server:
     include-binding-errors: always
     include-message: always
     include-stacktrace: always
+  port: 8081

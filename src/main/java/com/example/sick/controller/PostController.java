@@ -1,14 +1,27 @@
 package com.example.sick.controller;
 
+import com.example.sick.dto.request.PostRequest;
+import com.example.sick.dto.request.PostUpdateRequest;
+import com.example.sick.dto.response.PostResponse;
+import com.example.sick.dto.response.PostUpdateResponse;
 import com.example.sick.model.Post;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -19,20 +32,41 @@ public class PostController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private final RowMapper<PostResponse> postRowMapper = (rs, rowNum) -> new PostResponse(
+            rs.getLong("id"),
+            rs.getString("title"),
+            rs.getString("content"),
+            rs.getString("author"),
+            rs.getString("password")
+    );
+
     // 취약점 1: SQL Injection
     @GetMapping("/search")
-    public ResponseEntity<List<Map<String, Object>>> searchPosts(@RequestParam String keyword) {
+    public ResponseEntity<List<PostResponse>> searchPosts(@RequestParam String keyword) {
         String query = "SELECT * FROM posts WHERE title LIKE '%" + keyword + "%'";
-        List<Map<String, Object>> posts = jdbcTemplate.queryForList(query);
+        List<PostResponse> posts = jdbcTemplate.query(query, postRowMapper);
         return ResponseEntity.ok(posts);
     }
 
     // 취약점 2: XSS 취약점
     @PostMapping
-    public ResponseEntity<Void> createPost(@RequestBody Post post) {
+    public ResponseEntity<PostResponse> createPost(@RequestBody PostRequest post) {
         String query = "INSERT INTO posts (title, content, author, password) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(query, post.getTitle(), post.getContent(), post.getAuthor(), post.getPassword());
-        return ResponseEntity.ok().build();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getContent());
+            ps.setString(3, post.getAuthor());
+            ps.setString(4, post.getPassword());
+            return ps;
+        }, keyHolder);
+
+        Long id = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
+
+        PostResponse response = new PostResponse(id, post.getTitle(), post.getContent(), post.getAuthor(), post.getPassword());
+        return ResponseEntity.ok(response);
     }
 
     // 취약점 3: 파일 경로 조작 취약점
@@ -50,26 +84,31 @@ public class PostController {
 
     // 취약점 5: 입력값 검증 부족
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePost(@PathVariable Long id, @RequestBody String content) {
-        int age = Integer.parseInt(content); // 숫자가 아닌 입력에 대한 검증 없음
+    public ResponseEntity<PostUpdateResponse> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest content) {
+        int age = Integer.parseInt(content.getContent()); // 숫자가 아닌 입력에 대한 검증 없음
         String query = "UPDATE posts SET content = ? WHERE id = ?";
         jdbcTemplate.update(query, content, id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+                new PostUpdateResponse(
+                        id,
+                        content.getContent()
+                )
+        );
     }
 
     // 추가: 모든 게시글 조회
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getAllPosts() {
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
         String query = "SELECT * FROM posts";
-        List<Map<String, Object>> posts = jdbcTemplate.queryForList(query);
+        List<PostResponse> posts = jdbcTemplate.query(query, postRowMapper);
         return ResponseEntity.ok(posts);
     }
 
     // 추가: 특정 게시글 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getPost(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPost(@PathVariable Long id) {
         String query = "SELECT * FROM posts WHERE id = ?";
-        Map<String, Object> post = jdbcTemplate.queryForMap(query, id);
+        PostResponse post = jdbcTemplate.queryForObject(query, postRowMapper, id);
         return ResponseEntity.ok(post);
     }
 
@@ -80,4 +119,4 @@ public class PostController {
         jdbcTemplate.update(query, id);
         return ResponseEntity.ok().build();
     }
-} 
+}
