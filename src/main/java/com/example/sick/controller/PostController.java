@@ -6,7 +6,10 @@ import com.example.sick.dto.response.PostResponse;
 import com.example.sick.dto.response.PostUpdateResponse;
 import com.example.sick.model.Post;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,41 @@ public class PostController {
     );
 
     // 취약점 1: SQL Injection
+    @Operation(
+            summary = "키워드 기반 게시글 조회",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                                    examples = @ExampleObject(
+                                            name = "Post List Example",
+                                            summary = "예시 게시글 리스트",
+                                            value = """
+                        [
+                            {
+                                "id": 1,
+                                "title": "Hello World",
+                                "content": "예시 게시글 내용입니다.",
+                                "author": "jinjoowon",
+                                "password": "secret"
+                            },
+                            {
+                                "id": 2,
+                                "title": "New Post",
+                                "content": "또 다른 예시입니다.",
+                                "author": "ktuser",
+                                "password": "anotherpass"
+                            }
+                        ]
+                        """
+                                    )
+                            )
+                    )
+            }
+    )
     @GetMapping("/search")
     public ResponseEntity<List<PostResponse>> searchPosts(@RequestParam String keyword) {
         String query = "SELECT * FROM posts WHERE title LIKE '%" + keyword + "%'";
@@ -97,6 +135,37 @@ public class PostController {
     }
 
     // 추가: 모든 게시글 조회
+    @Operation(
+            summary = "게시글 검색",
+            parameters = {
+                    @Parameter(name = "keyword", description = "검색 키워드", required = true)
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "검색 결과",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)),
+                                    examples = @ExampleObject(
+                                            name = "Post Search Example",
+                                            summary = "예시 검색 결과",
+                                            value = """
+                        [
+                            {
+                                "id": 1,
+                                "title": "Hello World",
+                                "content": "예시 게시글 내용입니다.",
+                                "author": "jinjoowon",
+                                "password": "secret"
+                            }
+                        ]
+                        """
+                                    )
+                            )
+                    )
+            }
+    )
     @GetMapping
     public ResponseEntity<List<PostResponse>> getAllPosts() {
         String query = "SELECT * FROM posts";
