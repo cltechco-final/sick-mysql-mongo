@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(description = "게시글 정보")
 public class PostRequest {
-    @Schema(description = "제목", example = "Hello World")
+    @Schema(description = "제목", example = "NewJeans I Love You")
     private String title;
 
     @Schema(description = "내용", example = "This is a sample post.")

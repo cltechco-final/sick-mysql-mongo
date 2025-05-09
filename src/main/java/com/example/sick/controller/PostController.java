@@ -80,7 +80,7 @@ public class PostController {
             }
     )
     @GetMapping("/search")
-    public ResponseEntity<List<PostResponse>> searchPosts(@RequestParam String keyword) {
+    public ResponseEntity<List<PostResponse>> searchPosts(@Parameter(description = "검색 키워드", example = "NewJeans") @RequestParam String keyword) {
         String query = "SELECT * FROM posts WHERE title LIKE '%" + keyword + "%'";
         List<PostResponse> posts = jdbcTemplate.query(query, postRowMapper);
         return ResponseEntity.ok(posts);
@@ -122,7 +122,7 @@ public class PostController {
 
     // 취약점 5: 입력값 검증 부족
     @PutMapping("/{id}")
-    public ResponseEntity<PostUpdateResponse> updatePost(@PathVariable Long id, @RequestBody PostUpdateRequest content) {
+    public ResponseEntity<PostUpdateResponse> updatePost(@Parameter(description = "게시글 ID", example = "1") @PathVariable Long id, @RequestBody PostUpdateRequest content) {
         int age = Integer.parseInt(content.getContent()); // 숫자가 아닌 입력에 대한 검증 없음
         String query = "UPDATE posts SET content = ? WHERE id = ?";
         jdbcTemplate.update(query, content, id);
@@ -175,7 +175,7 @@ public class PostController {
 
     // 추가: 특정 게시글 조회
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPost(@Parameter(description = "게시글 ID", example = "1") @PathVariable Long id) {
         String query = "SELECT * FROM posts WHERE id = ?";
         PostResponse post = jdbcTemplate.queryForObject(query, postRowMapper, id);
         return ResponseEntity.ok(post);
@@ -183,7 +183,7 @@ public class PostController {
 
     // 추가: 게시글 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePost(@Parameter(description = "게시글 ID", example = "1") @PathVariable Long id) {
         String query = "DELETE FROM posts WHERE id = ?";
         jdbcTemplate.update(query, id);
         return ResponseEntity.ok().build();
