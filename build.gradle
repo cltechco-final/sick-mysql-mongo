@@ -21,6 +21,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'com.h2database:h2'
 	implementation 'org.projectlombok:lombok'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
@@ -29,6 +30,7 @@ dependencies {
 
 	//actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 }
 
 tasks.named('test') {
