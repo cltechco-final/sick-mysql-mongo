@@ -32,6 +32,7 @@ dependencies {
 	//actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {
