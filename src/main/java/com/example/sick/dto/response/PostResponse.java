@@ -14,7 +14,7 @@ public class PostResponse {
     @Schema(description = "ID", example = "1")
     private Long id;
 
-    @Schema(description = "제목", example = "Hello World")
+    @Schema(description = "제목", example = "KT TECH")
     private String title;
 
     @Schema(description = "내용", example = "This is a sample post.")

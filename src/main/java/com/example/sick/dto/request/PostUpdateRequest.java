@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(description = "게시글 수정")
 public class PostUpdateRequest {
-    @Schema(description = "내용", example = "I Love NewJeans Hanni !")
+    @Schema(description = "내용", example = "KT TECH COURSE 3")
     private String content;
 }

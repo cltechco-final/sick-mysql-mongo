@@ -60,14 +60,14 @@ public class PostController {
                         [
                             {
                                 "id": 1,
-                                "title": "Hello World",
+                                "title": "KT TECH FIRST",
                                 "content": "예시 게시글 내용입니다.",
                                 "author": "jinjoowon",
                                 "password": "secret"
                             },
                             {
                                 "id": 2,
-                                "title": "New Post",
+                                "title": "KT TECH SECOND",
                                 "content": "또 다른 예시입니다.",
                                 "author": "ktuser",
                                 "password": "anotherpass"
@@ -80,7 +80,7 @@ public class PostController {
             }
     )
     @GetMapping("/search")
-    public ResponseEntity<List<PostResponse>> searchPosts(@Parameter(description = "검색 키워드", example = "NewJeans") @RequestParam String keyword) {
+    public ResponseEntity<List<PostResponse>> searchPosts(@Parameter(description = "검색 키워드", example = "KT") @RequestParam String keyword) {
         String query = "SELECT * FROM posts WHERE title LIKE '%" + keyword + "%'";
         List<PostResponse> posts = jdbcTemplate.query(query, postRowMapper);
         return ResponseEntity.ok(posts);
@@ -154,7 +154,7 @@ public class PostController {
                         [
                             {
                                 "id": 1,
-                                "title": "Hello World",
+                                "title": "KT TECH FIRST",
                                 "content": "예시 게시글 내용입니다.",
                                 "author": "jinjoowon",
                                 "password": "secret"
@@ -181,11 +181,4 @@ public class PostController {
         return ResponseEntity.ok(post);
     }
 
-    // 추가: 게시글 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@Parameter(description = "게시글 ID", example = "1") @PathVariable Long id) {
-        String query = "DELETE FROM posts WHERE id = ?";
-        jdbcTemplate.update(query, id);
-        return ResponseEntity.ok().build();
-    }
 }

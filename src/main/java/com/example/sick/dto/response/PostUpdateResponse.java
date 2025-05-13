@@ -13,6 +13,6 @@ public class PostUpdateResponse {
     @Schema(description = "ID", example = "1")
     private Long id;
 
-    @Schema(description = "내용", example = "I Love NewJeans Hanni !")
+    @Schema(description = "내용", example = "KT TECH COURSE 3")
     private String content;
 }
